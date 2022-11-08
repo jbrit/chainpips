@@ -81,6 +81,7 @@ const Home: NextPage = () => {
             <Chart
               symbol="FX:EURUSD"
               container_id="tradingview_31607"
+              autosize
             />
           </div>
         </Content>
