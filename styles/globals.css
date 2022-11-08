@@ -40,11 +40,9 @@ a {
  .logo {
   height: 32px;
   margin: 16px;
-  /* background: rgba(255, 255, 255, 0.3); */
   color: #fff;
   display: flex;
   align-items: center;
-  justify-content: center;
   font-size: 18px;
   font-weight: 600;
   text-align: center;

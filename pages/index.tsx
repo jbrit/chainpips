@@ -3,12 +3,14 @@ import Head from "next/head";
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
-  UploadOutlined,
-  UserOutlined,
-  VideoCameraOutlined,
+  HistoryOutlined,
+  InfoCircleOutlined,
+  LineChartOutlined,
 } from "@ant-design/icons";
 import { Layout, Menu } from "antd";
 import React, { useState } from "react";
+import { AdvancedRealTimeChart } from "react-ts-tradingview-widgets";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 const { Header, Sider, Content } = Layout;
 
 const Home: NextPage = () => {
@@ -21,8 +23,8 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Sider trigger={null} collapsible collapsed={collapsed}>
-        <div style={collapsed ? { fontSize: "16px" } : {}} className="logo">
-          Chain{collapsed && <br/>}Pips
+        <div style={collapsed ? { fontSize: "16px", justifyContent: "center" } : {}} className="logo">
+          Chain{collapsed && <br />}Pips
         </div>
         <Menu
           theme="dark"
@@ -31,18 +33,18 @@ const Home: NextPage = () => {
           items={[
             {
               key: "1",
-              icon: <UserOutlined />,
-              label: "nav 1",
+              icon: <LineChartOutlined />,
+              label: "Trade",
             },
             {
               key: "2",
-              icon: <VideoCameraOutlined />,
-              label: "nav 2",
+              icon: <HistoryOutlined />,
+              label: "History",
             },
             {
               key: "3",
-              icon: <UploadOutlined />,
-              label: "nav 3",
+              icon: <InfoCircleOutlined />,
+              label: "About",
             },
           ]}
         />
@@ -52,6 +54,8 @@ const Home: NextPage = () => {
           className="site-layout-background"
           style={{
             padding: 0,
+            display: "flex",
+            alignItems: "center",
           }}
         >
           {React.createElement(
@@ -61,6 +65,9 @@ const Home: NextPage = () => {
               onClick: () => setCollapsed(!collapsed),
             }
           )}
+          <span style={{display: "inline-flex", marginLeft: "auto", paddingRight: "1rem"}}>
+            <ConnectButton />
+          </span>
         </Header>
         <Content
           className="site-layout-background"
@@ -69,7 +76,13 @@ const Home: NextPage = () => {
             padding: 24,
           }}
         >
-          Content
+          <div style={{ height: "100%", overflow: "scroll" }}>
+            <div id="tradingview_31607"></div>
+            <AdvancedRealTimeChart
+              symbol="FX:EURUSD"
+              container_id="tradingview_31607"
+            />
+          </div>
         </Content>
       </Layout>
     </Layout>
