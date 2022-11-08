@@ -1,4 +1,6 @@
-This is a starter kit for EVM compatible dapps.
+# ChainPips
+
+ChainPips is a tool for performing trades on chain.
 
 ## Getting Started
 
