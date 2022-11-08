@@ -9,8 +9,8 @@ import {
 } from "@ant-design/icons";
 import { Layout, Menu } from "antd";
 import React, { useState } from "react";
-import { AdvancedRealTimeChart } from "react-ts-tradingview-widgets";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import Chart from "$components/Chart";
 const { Header, Sider, Content } = Layout;
 
 const Home: NextPage = () => {
@@ -78,7 +78,7 @@ const Home: NextPage = () => {
         >
           <div style={{ height: "100%", overflow: "scroll" }}>
             <div id="tradingview_31607"></div>
-            <AdvancedRealTimeChart
+            <Chart
               symbol="FX:EURUSD"
               container_id="tradingview_31607"
             />
