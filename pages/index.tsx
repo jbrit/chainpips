@@ -12,6 +12,8 @@ import React, { useState } from "react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import Chart from "$components/Chart";
 const { Header, Sider, Content } = Layout;
+import { Col, Row } from "antd";
+import TradingSidebar from "$components/TradingSidebar";
 
 const Home: NextPage = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -23,7 +25,12 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Sider trigger={null} collapsible collapsed={collapsed}>
-        <div style={collapsed ? { fontSize: "16px", justifyContent: "center" } : {}} className="logo">
+        <div
+          style={
+            collapsed ? { fontSize: "16px", justifyContent: "center" } : {}
+          }
+          className="logo"
+        >
           Chain{collapsed && <br />}Pips
         </div>
         <Menu
@@ -65,7 +72,13 @@ const Home: NextPage = () => {
               onClick: () => setCollapsed(!collapsed),
             }
           )}
-          <span style={{display: "inline-flex", marginLeft: "auto", paddingRight: "1rem"}}>
+          <span
+            style={{
+              display: "inline-flex",
+              marginLeft: "auto",
+              paddingRight: "1rem",
+            }}
+          >
             <ConnectButton />
           </span>
         </Header>
@@ -76,14 +89,21 @@ const Home: NextPage = () => {
             padding: 24,
           }}
         >
-          <div style={{ height: "100%", overflow: "scroll" }}>
-            <div id="tradingview_31607"></div>
-            <Chart
-              symbol="FX:EURUSD"
-              container_id="tradingview_31607"
-              autosize
-            />
-          </div>
+          <Row gutter={16}>
+            <Col span={16}>
+              <div style={{ minHeight: "60vh", overflow: "scroll" }}>
+                <div id="tradingview_31607"></div>
+                <Chart
+                  symbol="FX:EURUSD"
+                  container_id="tradingview_31607"
+                  autosize
+                />
+              </div>
+            </Col>
+            <Col span={8}>
+              <TradingSidebar/>
+            </Col>
+          </Row>
         </Content>
       </Layout>
     </Layout>
