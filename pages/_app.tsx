@@ -1,5 +1,6 @@
 import "../styles/globals.css";
 import "antd/dist/antd.css";
+import { QueryClient, QueryClientProvider } from "react-query";
 import type { AppProps } from "next/app";
 import { Web3ReactProvider } from "@web3-react/core";
 import { Web3Provider } from "@ethersproject/providers";
@@ -17,21 +18,24 @@ function getLibrary(provider: any): Web3Provider {
 
 function MyApp({ Component, pageProps }: AppProps) {
   const [currentPair, setCurrentPair] = useState("EURUSD");
+  const [queryClient] = useState(() => new QueryClient());
   return (
-    <AppContextProvider
-      value={{
-        currentPair,
-        setCurrentPair,
-      }}
-    >
-      <Web3ReactProvider getLibrary={getLibrary}>
-        <WagmiConfig client={wagmiClient}>
-          <RainbowKitProvider chains={chains}>
-            <Component {...pageProps} />
-          </RainbowKitProvider>
-        </WagmiConfig>
-      </Web3ReactProvider>
-    </AppContextProvider>
+    <QueryClientProvider client={queryClient}>
+      <AppContextProvider
+        value={{
+          currentPair,
+          setCurrentPair,
+        }}
+      >
+        <Web3ReactProvider getLibrary={getLibrary}>
+          <WagmiConfig client={wagmiClient}>
+            <RainbowKitProvider chains={chains}>
+              <Component {...pageProps} />
+            </RainbowKitProvider>
+          </WagmiConfig>
+        </Web3ReactProvider>
+      </AppContextProvider>
+    </QueryClientProvider>
   );
 }
 
