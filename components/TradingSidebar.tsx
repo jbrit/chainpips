@@ -2,6 +2,8 @@ import React, { useRef } from "react";
 import { Button, Col, Form, Typography, Row, Select } from "antd";
 import type { FormInstance } from "antd/es/form";
 import { useAppContext } from "$utils/context";
+import { getPositions, openBuyTrade } from "$utils/actions";
+import { useWalletInfo } from "$utils/hooks";
 
 const { Option } = Select;
 
@@ -14,6 +16,8 @@ const TradingSidebar = (props: Props) => {
     labelCol: { span: 24 },
     wrapperCol: { span: 24 },
   };
+
+  const { provider, isConnected } = useWalletInfo();
 
   const onChange = (value: string) => {
     setCurrentPair(value);
@@ -35,16 +39,31 @@ const TradingSidebar = (props: Props) => {
           <Option value="AUDUSD">AUDUSD</Option>
         </Select>
       </Form.Item>
-      <Typography.Title style={{textAlign: "center"}} level={1}>0.64121</Typography.Title>
+      <Typography.Title style={{ textAlign: "center" }} level={1}>
+        0.64121
+      </Typography.Title>
       <Row gutter={8}>
         <Col span={12}>
-            <Button type="primary" block>Buy</Button>
+          <Button
+            type="primary"
+            block
+            onClick={async () => {
+              if (!isConnected) return alert("Please connect your wallet");
+                await openBuyTrade(provider, 1000);
+            }}
+          >
+            Buy
+          </Button>
         </Col>
         <Col span={12}>
-            <Button type="primary" block danger>Sell</Button>
+          <Button type="primary" block danger>
+            Sell
+          </Button>
         </Col>
       </Row>
-      <Typography.Title style={{padding: "2rem 0"}} level={5}>Positions</Typography.Title>
+      <Typography.Title style={{ padding: "2rem 0" }} level={5}>
+        Positions
+      </Typography.Title>
     </Form>
   );
 };
