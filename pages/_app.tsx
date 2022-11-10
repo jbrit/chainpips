@@ -6,6 +6,8 @@ import { Web3Provider } from "@ethersproject/providers";
 import { WagmiConfig } from "wagmi";
 import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { chains, wagmiClient } from "$utils/rainbow";
+import { AppContextProvider } from "$utils/context";
+import { useState } from "react";
 
 function getLibrary(provider: any): Web3Provider {
   const library = new Web3Provider(provider);
@@ -14,14 +16,22 @@ function getLibrary(provider: any): Web3Provider {
 }
 
 function MyApp({ Component, pageProps }: AppProps) {
+  const [currentPair, setCurrentPair] = useState("EURUSD");
   return (
-    <Web3ReactProvider getLibrary={getLibrary}>
-      <WagmiConfig client={wagmiClient}>
-        <RainbowKitProvider chains={chains}>
-          <Component {...pageProps} />
-        </RainbowKitProvider>
-      </WagmiConfig>
-    </Web3ReactProvider>
+    <AppContextProvider
+      value={{
+        currentPair,
+        setCurrentPair,
+      }}
+    >
+      <Web3ReactProvider getLibrary={getLibrary}>
+        <WagmiConfig client={wagmiClient}>
+          <RainbowKitProvider chains={chains}>
+            <Component {...pageProps} />
+          </RainbowKitProvider>
+        </WagmiConfig>
+      </Web3ReactProvider>
+    </AppContextProvider>
   );
 }
 

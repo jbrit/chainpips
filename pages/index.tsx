@@ -14,9 +14,11 @@ import Chart from "$components/Chart";
 const { Header, Sider, Content } = Layout;
 import { Col, Row } from "antd";
 import TradingSidebar from "$components/TradingSidebar";
+import { useAppContext } from "$utils/context";
 
 const Home: NextPage = () => {
   const [collapsed, setCollapsed] = useState(false);
+  const { currentPair } = useAppContext();
   return (
     <Layout className="layout">
       <Head>
@@ -94,7 +96,7 @@ const Home: NextPage = () => {
               <div style={{ minHeight: "60vh", overflow: "scroll" }}>
                 <div id="tradingview_31607"></div>
                 <Chart
-                  symbol="FX:EURUSD"
+                  symbol={"FX:"+currentPair}
                   container_id="tradingview_31607"
                   autosize
                 />
