@@ -23,9 +23,11 @@ import { useQuery } from "react-query";
 
 const { Option } = Select;
 
-type Props = {};
+type Props = {
+  showAll?: boolean;
+};
 
-const TradingSidebar = (props: Props) => {
+const TradingSidebar = ({ showAll }: Props) => {
   type FormFields = {
     "trading-pair": string;
     amount: number;
@@ -144,7 +146,7 @@ const TradingSidebar = (props: Props) => {
       </Typography.Title>
       {positionsQuery.isLoading && <Spin />}
       {positionsQuery.data
-        ?.filter(({ exitTime }) => exitTime === 0)
+        ?.filter(({ exitTime }) => showAll ?? exitTime === 0)
         .map((position) => (
           <PositionCard
             key={position.id}
@@ -168,6 +170,12 @@ const PositionCard: React.FC<PositionProps> = ({
   price,
 }) => {
   const [loading, setLoading] = useState(false);
+  const entryPrice = position.entryPrice / 1e8;
+  const exitPrice = position.exitTime === 0 ? price : position.exitPrice / 1e8;
+  const pnl =
+    (exitPrice - entryPrice) *
+    position.amount *
+    (position.tradeType === 0 ? 1 : -1);
   return (
     <div
       key={position.id}
@@ -181,30 +189,32 @@ const PositionCard: React.FC<PositionProps> = ({
             color: position.tradeType === 0 ? "#1890ff" : "#ff4d4f",
           }}
         >
-          {position.tradeType === 0 ? "buy" : "sell"} ${position.amount}
+          {position.tradeType === 0 ? "buy" : "sell"} ${position.amount} ({pnl.toFixed(2)})
         </span>
       </Typography.Title>
       <div>
         <Typography.Text>
-          {position.entryPrice / 100000000} &#8594; {price}
+          {entryPrice} &#8594; {exitPrice}
         </Typography.Text>
       </div>
       <hr />
       {/* Close */}
-      <Button
-        loading={loading}
-        onClick={async () => {
-          setLoading(true);
-          try {
-            await closeTrade(provider, position.id);
-            await positionsQuery.refetch();
-          } catch (error) {}
-          setLoading(false);
-        }}
-        style={{ position: "absolute", right: "0.5rem", bottom: "50%" }}
-      >
-        x
-      </Button>
+      {position.exitTime === 0 && (
+        <Button
+          loading={loading}
+          onClick={async () => {
+            setLoading(true);
+            try {
+              await closeTrade(provider, position.id);
+              await positionsQuery.refetch();
+            } catch (error) {}
+            setLoading(false);
+          }}
+          style={{ position: "absolute", right: "0.5rem", bottom: "50%" }}
+        >
+          x
+        </Button>
+      )}
     </div>
   );
 };
