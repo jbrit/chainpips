@@ -15,11 +15,24 @@ const { Header, Sider, Content } = Layout;
 import { Col, Row } from "antd";
 import TradingSidebar from "$components/TradingSidebar";
 import { useAppContext } from "$utils/context";
+import Moralis from "$utils/moralis";
+import { EvmChain } from "@moralisweb3/evm-utils";
 
 const Home: NextPage = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [currentTab, setCurrentTab] = useState("1");
   const { currentPair } = useAppContext();
+
+  (async () => {
+    const address = "0xbC5a3400E7F8ebb20851226fb6daf7acE7050904";
+    const chain = EvmChain.MUMBAI;
+    const response = await Moralis.EvmApi.events.getContractLogs({
+      chain,
+      address,
+    });
+    console.log(response);
+  })();
+
   return (
     <Layout className="layout">
       <Head>
