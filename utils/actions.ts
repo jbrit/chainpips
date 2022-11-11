@@ -1,5 +1,5 @@
+import { AggregatorV3Interface__factory } from "typechain-types";
 import { chainPipsContract } from "contract-factory";
-import { type } from "os";
 
 export enum TradeType {
   Buy = 0,
@@ -15,9 +15,9 @@ export const openTrade = async (
   const tx = await contract.openTrade(
     _type,
     amount,
-    "0xcD4bde67fe7C6Eb601d03a35Ea8a55eB2b136965"
+    "0x7d7356bF6Ee5CDeC22B216581E48eCC700D0497A"
   );
-  await tx.wait(2);
+  await tx.wait();
   return tx;
 };
 
@@ -65,3 +65,10 @@ export const getPositions = async (provider: any) => {
   }
   return positions;
 };
+
+export const getPairPrice = async (provider: any) => {
+    const contract = AggregatorV3Interface__factory.connect("0x7d7356bF6Ee5CDeC22B216581E48eCC700D0497A", provider);
+    const price = await contract.latestRoundData();
+    return price.answer.toNumber();
+}
+

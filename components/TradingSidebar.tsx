@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Button,
   Col,
@@ -13,6 +13,7 @@ import type { FormInstance } from "antd/es/form";
 import { useAppContext } from "$utils/context";
 import {
   closeTrade,
+  getPairPrice,
   getPositions,
   openBuyTrade,
   openSellTrade,
@@ -29,20 +30,35 @@ const TradingSidebar = (props: Props) => {
     "trading-pair": string;
     amount: number;
   };
-  const { setCurrentPair } = useAppContext();
+  const { setCurrentPair, currentPair } = useAppContext();
   const formRef = useRef<FormInstance<FormFields>>(null);
   const layout = {
     labelCol: { span: 24 },
     wrapperCol: { span: 24 },
   };
 
+  const [buying, setBuying] = useState(false);
+  const [selling, setSelling] = useState(false);
+
   const { provider, isConnected } = useWalletInfo();
 
-  const positionsQuery = useQuery("positions", () => getPositions(provider));
+  const positionsQuery = useQuery("positions", () => getPositions(provider), {
+    refetchInterval: 1000,
+  });
+
+  const pairPriceQuery = useQuery("pairPrice", () => getPairPrice(provider), {
+    refetchInterval: 1000,
+  });
 
   const onChange = (value: string) => {
     setCurrentPair(value);
   };
+  const price =
+    currentPair === "EURUSD"
+      ? pairPriceQuery.data
+        ? pairPriceQuery.data / 1e8
+        : "--"
+      : null;
 
   return (
     <Form {...layout} ref={formRef} name="control-ref">
@@ -61,7 +77,7 @@ const TradingSidebar = (props: Props) => {
         </Select>
       </Form.Item>
       <Typography.Title style={{ textAlign: "center" }} level={1}>
-        0.64121
+        {price}
       </Typography.Title>
       {/* amount */}
       <Form.Item
@@ -77,13 +93,21 @@ const TradingSidebar = (props: Props) => {
           <Button
             type="primary"
             block
+            loading={buying}
+            disabled={currentPair !== "EURUSD" || !isConnected}
             onClick={async () => {
-              await formRef.current?.validateFields();
-              const values = formRef.current?.getFieldsValue();
-              if (!isConnected) return alert("Please connect your wallet");
-              if (!values?.amount) return alert("Please enter amount");
-              await openBuyTrade(provider, values.amount);
-              await positionsQuery.refetch();
+              setBuying(true);
+              try {
+                await formRef.current?.validateFields();
+                const values = formRef.current?.getFieldsValue();
+                if (!isConnected) return alert("Please connect your wallet");
+                if (!values?.amount) return alert("Please enter amount");
+                await openBuyTrade(provider, values.amount);
+                await positionsQuery.refetch();
+              } catch (error) {
+              } finally {
+                setBuying(false);
+              }
             }}
           >
             Buy
@@ -93,13 +117,21 @@ const TradingSidebar = (props: Props) => {
           <Button
             type="primary"
             block
+            loading={selling}
+            disabled={currentPair !== "EURUSD" || !isConnected}
             onClick={async () => {
-              await formRef.current?.validateFields();
-              const values = formRef.current?.getFieldsValue();
-              if (!isConnected) return alert("Please connect your wallet");
-              if (!values?.amount) return alert("Please enter amount");
-              await openSellTrade(provider, values.amount);
-              await positionsQuery.refetch();
+              setSelling(true);
+              try {
+                await formRef.current?.validateFields();
+                const values = formRef.current?.getFieldsValue();
+                if (!isConnected) return alert("Please connect your wallet");
+                if (!values?.amount) return alert("Please enter amount");
+                await openSellTrade(provider, values.amount);
+                await positionsQuery.refetch();
+              } catch (error) {
+              } finally {
+                setSelling(false);
+              }
             }}
             danger
           >
@@ -114,40 +146,66 @@ const TradingSidebar = (props: Props) => {
       {positionsQuery.data
         ?.filter(({ exitTime }) => exitTime === 0)
         .map((position) => (
-          <div
+          <PositionCard
             key={position.id}
-            style={{ marginBottom: "1rem", position: "relative" }}
-          >
-            {/* Display pair, amount, entry price and time, exit price amd time */}
-            <Typography.Title level={5}>
-              {"EURUSD" ?? position.tradingPair},{" "}
-              <span
-                style={{
-                  color: position.tradeType === 0 ? "#1890ff" : "#ff4d4f",
-                }}
-              >
-                {position.tradeType === 0 ? "buy" : "sell"} ${position.amount}
-              </span>
-            </Typography.Title>
-            <div>
-              <Typography.Text>
-                {position.entryPrice} &#8594; {position.exitPrice}{" "}
-              </Typography.Text>
-            </div>
-            <hr />
-            {/* Close */}
-            <Button
-              onClick={async () => {
-                await closeTrade(provider, position.id);
-                await positionsQuery.refetch();
-              }}
-              style={{ position: "absolute", right: "0.5rem", bottom: "50%" }}
-            >
-              x
-            </Button>
-          </div>
+            {...{ position, provider, positionsQuery, price }}
+          />
         ))}
     </Form>
+  );
+};
+
+type PositionProps = {
+  position: any;
+  provider: any;
+  positionsQuery: any;
+  price: any;
+};
+const PositionCard: React.FC<PositionProps> = ({
+  position,
+  provider,
+  positionsQuery,
+  price,
+}) => {
+  const [loading, setLoading] = useState(false);
+  return (
+    <div
+      key={position.id}
+      style={{ marginBottom: "1rem", position: "relative" }}
+    >
+      {/* Display pair, amount, entry price and time, exit price amd time */}
+      <Typography.Title level={5}>
+        {"EURUSD" ?? position.tradingPair},{" "}
+        <span
+          style={{
+            color: position.tradeType === 0 ? "#1890ff" : "#ff4d4f",
+          }}
+        >
+          {position.tradeType === 0 ? "buy" : "sell"} ${position.amount}
+        </span>
+      </Typography.Title>
+      <div>
+        <Typography.Text>
+          {position.entryPrice / 100000000} &#8594; {price}
+        </Typography.Text>
+      </div>
+      <hr />
+      {/* Close */}
+      <Button
+        loading={loading}
+        onClick={async () => {
+          setLoading(true);
+          try {
+            await closeTrade(provider, position.id);
+            await positionsQuery.refetch();
+          } catch (error) {}
+          setLoading(false);
+        }}
+        style={{ position: "absolute", right: "0.5rem", bottom: "50%" }}
+      >
+        x
+      </Button>
+    </div>
   );
 };
 
