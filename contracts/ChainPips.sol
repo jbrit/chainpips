@@ -46,6 +46,7 @@ contract ChainPips is Ownable {
         require(isPair[_tradingPair], "Trading pair not supported");
         // validate user has that amount and transfer it to the contract
 
+        USDPEG.transferFrom(msg.sender, address(this), _amount);
 
         (
             /*uint80 roundID*/,
@@ -95,8 +96,12 @@ contract ChainPips is Ownable {
         if (positions[_id].tradeType == TradeType.Sell) {
             profit = profit * -1;
         }
-    
 
+        int256 returnable = int256(positions[_id].amount) + profit;
+
+        if(returnable > 0){
+            USDPEG.transferFrom(address(this), msg.sender, uint256(returnable));
+        }
 
         // interaction
         emit TradeClosed(0, block.timestamp, _id, profit);
