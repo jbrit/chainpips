@@ -140,7 +140,7 @@ const Home: NextPage = () => {
           {currentTab === "3" && (
             <Row gutter={16}>
               <Col span={16}>
-                <Typography.Title level={3}>Abou Chain Pips</Typography.Title>
+                <Typography.Title level={3}>About Chain Pips</Typography.Title>
                 <Typography.Paragraph>
                   ChainPips is a permissionless forex trading platform built on
                   Binance Smart Chain. It allows users to trade forex pairs with
@@ -148,7 +148,7 @@ const Home: NextPage = () => {
                   interest on their positions.
                 </Typography.Paragraph>
                 <Typography.Paragraph>
-                  Liquidity is provided by ChainPips' liquidity providers. LPs
+                  Liquidity is provided by ChainPips&apos; liquidity providers. LPs
                   earn interest on their positions and are incentivized to
                   provide liquidity to the platform.
                 </Typography.Paragraph>
