@@ -25,9 +25,10 @@ const { Option } = Select;
 
 type Props = {
   showAll?: boolean;
+  balance: string;
 };
 
-const TradingSidebar = ({ showAll }: Props) => {
+const TradingSidebar = ({ showAll, balance}: Props) => {
   type FormFields = {
     "trading-pair": string;
     amount: number;
@@ -64,6 +65,7 @@ const TradingSidebar = ({ showAll }: Props) => {
 
   return (
     <Form {...layout} ref={formRef} name="control-ref">
+      USDP Balance: {balance}
       <Form.Item
         initialValue={"EURUSD"}
         name="trading-pair"

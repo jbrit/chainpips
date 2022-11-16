@@ -17,21 +17,31 @@ import TradingSidebar from "$components/TradingSidebar";
 import { useAppContext } from "$utils/context";
 import Moralis from "$utils/moralis";
 import { EvmChain } from "@moralisweb3/evm-utils";
+import { useWalletInfo } from "$utils/hooks";
+import { USDP_ADDR } from "contract-factory";
+import { useQuery } from "react-query";
 
 const Home: NextPage = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [currentTab, setCurrentTab] = useState("1");
   const { currentPair } = useAppContext();
-
-  (async () => {
-    const address = "0xbC5a3400E7F8ebb20851226fb6daf7acE7050904";
-    const chain = EvmChain.MUMBAI;
-    const response = await Moralis.EvmApi.events.getContractLogs({
-      chain,
-      address,
-    });
-    console.log(response);
-  })();
+  const { address } = useWalletInfo();
+  const { data: tokenValue, isSuccess} = useQuery(
+    "usdp",
+    async () =>
+      (
+        await Moralis.EvmApi.token.getWalletTokenBalances({
+          address: address as string,
+          chain: EvmChain.BSC_TESTNET,
+        })
+      ).toJSON().filter(({ token }) => token?.contractAddress.toLocaleLowerCase() === USDP_ADDR.toLowerCase())
+      .at(0),
+    {
+      enabled: !!address,
+    }
+  );
+  const balance = tokenValue?.value ??  "0";
+  console.log(balance);
 
   return (
     <Layout className="layout">
@@ -121,7 +131,7 @@ const Home: NextPage = () => {
                 </div>
               </Col>
               <Col span={8}>
-                <TradingSidebar />
+                <TradingSidebar balance={balance} />
               </Col>
             </Row>
           )}
@@ -133,7 +143,7 @@ const Home: NextPage = () => {
               <div
                 style={{ overflow: "scroll", maxHeight: "calc(100% - 3rem)" }}
               >
-                <TradingSidebar showAll />
+                <TradingSidebar balance={balance} showAll />
               </div>
             </>
           )}
@@ -148,8 +158,8 @@ const Home: NextPage = () => {
                   interest on their positions.
                 </Typography.Paragraph>
                 <Typography.Paragraph>
-                  Liquidity is provided by ChainPips&apos; liquidity providers. LPs
-                  earn interest on their positions and are incentivized to
+                  Liquidity is provided by ChainPips&apos; liquidity providers.
+                  LPs earn interest on their positions and are incentivized to
                   provide liquidity to the platform.
                 </Typography.Paragraph>
               </Col>
