@@ -20,6 +20,8 @@ import {
 } from "$utils/actions";
 import { useWalletInfo } from "$utils/hooks";
 import { useQuery } from "react-query";
+import { erc20Contract } from "contract-factory";
+import { BigNumber } from "ethers";
 
 const { Option } = Select;
 
@@ -44,7 +46,7 @@ const TradingSidebar = ({ showAll, balance }: Props) => {
   const [buying, setBuying] = useState(false);
   const [selling, setSelling] = useState(false);
 
-  const { provider, isConnected } = useWalletInfo();
+  const { provider, isConnected, address } = useWalletInfo();
 
   const positionsQuery = useQuery("positions", () => getPositions(provider), {
     refetchInterval: 1000,
@@ -106,6 +108,18 @@ const TradingSidebar = ({ showAll, balance }: Props) => {
                 const values = formRef.current?.getFieldsValue();
                 if (!isConnected) return alert("Please connect your wallet");
                 if (!values?.amount) return alert("Please enter amount");
+                const allowance = await erc20Contract(provider).allowance(
+                  address!,
+                  "0x720d45aB23a02000c2d61079361Ca43417db25a9"
+                );
+                if (allowance < BigNumber.from(values.amount)) {
+                  // maximum allowance
+                  const tx = await erc20Contract(provider).approve(
+                    "0x720d45aB23a02000c2d61079361Ca43417db25a9",
+                    "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+                  );
+                  await tx.wait(1);
+                }
                 await openBuyTrade(provider, values.amount);
                 await positionsQuery.refetch();
               } catch (error) {
@@ -130,6 +144,18 @@ const TradingSidebar = ({ showAll, balance }: Props) => {
                 const values = formRef.current?.getFieldsValue();
                 if (!isConnected) return alert("Please connect your wallet");
                 if (!values?.amount) return alert("Please enter amount");
+                const allowance = await erc20Contract(provider).allowance(
+                  address!,
+                  "0x720d45aB23a02000c2d61079361Ca43417db25a9"
+                );
+                if (allowance < BigNumber.from(values.amount)) {
+                  // maximum allowance
+                  const tx = await erc20Contract(provider).approve(
+                    "0x720d45aB23a02000c2d61079361Ca43417db25a9",
+                    "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+                  );
+                  await tx.wait(1);
+                }
                 await openSellTrade(provider, values.amount);
                 await positionsQuery.refetch();
               } catch (error) {
@@ -173,8 +199,8 @@ const PositionCard: React.FC<PositionProps> = ({
 }) => {
   const [loading, setLoading] = useState(false);
   const entryPrice = (position.entryPrice * FACTOR) / 1e8;
-  const exitPrice =
-    (position.exitTime === 0 ? price : position.exitPrice / 1e8) * FACTOR;
+  // already factored
+  const exitPrice = position.exitTime === 0 ? price : position.exitPrice / 1e8;
   const pnl =
     (exitPrice - entryPrice) *
     position.amount *
@@ -198,7 +224,7 @@ const PositionCard: React.FC<PositionProps> = ({
       </Typography.Title>
       <div>
         <Typography.Text>
-          {entryPrice} &#8594; {exitPrice}
+          {entryPrice.toFixed(5)} &#8594; {exitPrice.toFixed(5)}
         </Typography.Text>
       </div>
       <hr />

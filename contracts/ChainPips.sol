@@ -100,7 +100,7 @@ contract ChainPips is Ownable {
         int256 returnable = int256(positions[_id].amount) + profit;
 
         if(returnable > 0){
-            USDPEG.transferFrom(address(this), msg.sender, uint256(returnable));
+            USDPEG.transfer(msg.sender, uint256(returnable));
         }
 
         // interaction
