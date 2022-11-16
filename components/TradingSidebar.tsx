@@ -21,7 +21,7 @@ import {
 import { useWalletInfo } from "$utils/hooks";
 import { useQuery } from "react-query";
 import { erc20Contract } from "contract-factory";
-import { BigNumber } from "ethers";
+import { BigNumber, ethers } from "ethers";
 
 const { Option } = Select;
 
@@ -120,7 +120,10 @@ const TradingSidebar = ({ showAll, balance }: Props) => {
                   );
                   await tx.wait(1);
                 }
-                await openBuyTrade(provider, values.amount);
+                await openBuyTrade(
+                  provider,
+                  ethers.utils.parseEther("" + values.amount)
+                );
                 await positionsQuery.refetch();
               } catch (error) {
               } finally {
@@ -156,7 +159,10 @@ const TradingSidebar = ({ showAll, balance }: Props) => {
                   );
                   await tx.wait(1);
                 }
-                await openSellTrade(provider, values.amount);
+                await openSellTrade(
+                  provider,
+                  ethers.utils.parseEther("" + values.amount)
+                );
                 await positionsQuery.refetch();
               } catch (error) {
               } finally {
@@ -174,7 +180,11 @@ const TradingSidebar = ({ showAll, balance }: Props) => {
       </Typography.Title>
       {positionsQuery.isLoading && <Spin />}
       {positionsQuery.data
-        ?.filter(({ exitTime }) => showAll ?? exitTime === 0)
+        ?.filter(
+          ({ exitTime, trader }) =>
+            trader.toLowerCase() === address?.toLowerCase() &&
+            (showAll ?? exitTime === 0)
+        )
         .map((position) => (
           <PositionCard
             key={position.id}

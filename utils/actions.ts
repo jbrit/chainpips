@@ -1,5 +1,6 @@
 import { AggregatorV3Interface__factory } from "typechain-types";
 import { chainPipsContract } from "contract-factory";
+import { BigNumber } from "ethers";
 
 export enum TradeType {
   Buy = 0,
@@ -8,7 +9,7 @@ export enum TradeType {
 
 export const openTrade = async (
   provider: any,
-  amount: number,
+  amount: BigNumber,
   _type: TradeType
 ) => {
   const contract = chainPipsContract(provider);
@@ -21,9 +22,9 @@ export const openTrade = async (
   return tx;
 };
 
-export const openBuyTrade = async (provider: any, amount: number) =>
+export const openBuyTrade = async (provider: any, amount: BigNumber) =>
   await openTrade(provider, amount, TradeType.Buy);
-export const openSellTrade = async (provider: any, amount: number) =>
+export const openSellTrade = async (provider: any, amount: BigNumber) =>
   await openTrade(provider, amount, TradeType.Sell);
 
 export const closeTrade = async (provider: any, tradeId: number) => {
@@ -54,7 +55,7 @@ export const getPositions = async (provider: any) => {
     positions.push({
         id: position.id.toNumber(),
         trader: position.trader,
-        amount: position.amount.toNumber(),
+        amount: position.amount.div(BigNumber.from(10).pow(18)).toNumber(),
         entryPrice: position.entryPrice.toNumber(),
         entryTime: position.entryTime.toNumber(),
         exitPrice: position.exitPrice.toNumber(),
