@@ -15,7 +15,7 @@ export const openTrade = async (
   const tx = await contract.openTrade(
     _type,
     amount,
-    "0x7d7356bF6Ee5CDeC22B216581E48eCC700D0497A"
+    "0x2514895c72f50D8bd4B4F9b1110F0D6bD2c97526"
   );
   await tx.wait();
   return tx;
@@ -67,7 +67,7 @@ export const getPositions = async (provider: any) => {
 };
 
 export const getPairPrice = async (provider: any) => {
-    const contract = AggregatorV3Interface__factory.connect("0x7d7356bF6Ee5CDeC22B216581E48eCC700D0497A", provider);
+    const contract = AggregatorV3Interface__factory.connect("0x2514895c72f50D8bd4B4F9b1110F0D6bD2c97526", provider);
     const price = await contract.latestRoundData();
     return price.answer.toNumber();
 }

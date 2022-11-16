@@ -27,8 +27,9 @@ type Props = {
   showAll?: boolean;
   balance: string;
 };
+const FACTOR = 0.00374290882;
 
-const TradingSidebar = ({ showAll, balance}: Props) => {
+const TradingSidebar = ({ showAll, balance }: Props) => {
   type FormFields = {
     "trading-pair": string;
     amount: number;
@@ -59,7 +60,7 @@ const TradingSidebar = ({ showAll, balance}: Props) => {
   const price =
     currentPair === "EURUSD"
       ? pairPriceQuery.data
-        ? pairPriceQuery.data / 1e8
+        ? (pairPriceQuery.data * FACTOR) / 1e8
         : "--"
       : null;
 
@@ -81,7 +82,7 @@ const TradingSidebar = ({ showAll, balance}: Props) => {
         </Select>
       </Form.Item>
       <Typography.Title style={{ textAlign: "center" }} level={1}>
-        {price}
+        {typeof price === "number" ? price.toFixed(5) : price}
       </Typography.Title>
       {/* amount */}
       <Form.Item
@@ -91,7 +92,6 @@ const TradingSidebar = ({ showAll, balance}: Props) => {
       >
         <InputNumber min={1} />
       </Form.Item>
-
       <Row gutter={8}>
         <Col span={12}>
           <Button
@@ -172,8 +172,9 @@ const PositionCard: React.FC<PositionProps> = ({
   price,
 }) => {
   const [loading, setLoading] = useState(false);
-  const entryPrice = position.entryPrice / 1e8;
-  const exitPrice = position.exitTime === 0 ? price : position.exitPrice / 1e8;
+  const entryPrice = (position.entryPrice * FACTOR) / 1e8;
+  const exitPrice =
+    (position.exitTime === 0 ? price : position.exitPrice / 1e8) * FACTOR;
   const pnl =
     (exitPrice - entryPrice) *
     position.amount *
@@ -191,7 +192,8 @@ const PositionCard: React.FC<PositionProps> = ({
             color: position.tradeType === 0 ? "#1890ff" : "#ff4d4f",
           }}
         >
-          {position.tradeType === 0 ? "buy" : "sell"} ${position.amount} ({pnl.toFixed(2)})
+          {position.tradeType === 0 ? "buy" : "sell"} ${position.amount} (
+          {pnl.toFixed(2)})
         </span>
       </Typography.Title>
       <div>
